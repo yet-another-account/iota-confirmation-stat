@@ -19,5 +19,10 @@ public enum Status {
 	/**
 	 * Depth too low in network and needs to be reattached
 	 */
-	DEPTHLOW
+	DEPTHLOW,
+	
+	/**
+	 * Transaction has invalid trytes
+	 */
+	INVALID
 }
