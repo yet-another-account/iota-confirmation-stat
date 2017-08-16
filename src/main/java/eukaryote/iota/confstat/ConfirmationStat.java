@@ -46,6 +46,10 @@ public class ConfirmationStat {
 			
 			// bad bundle?
 			return Status.INVALID;
+		} catch (NumberFormatException e) {
+			
+			// doublespent bundles somehow throw numberformatexception
+			return Status.DOUBLESPEND;
 		}
 		
 		// check for doublespending
