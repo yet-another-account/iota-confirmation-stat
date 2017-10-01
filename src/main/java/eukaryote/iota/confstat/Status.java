@@ -21,10 +21,14 @@ public enum Status {
 	 */
 	DEPTHLOW("Failed - Reattach Needed"),
 	
+	
 	/**
 	 * Transaction has invalid trytes
 	 */
-	INVALID("Failed - Invalid");
+	INVALID("Failed - Invalid"),
+	
+
+	BADSIGNATURE("Failed - Invalid Signature");
 	
 	String name;
 	

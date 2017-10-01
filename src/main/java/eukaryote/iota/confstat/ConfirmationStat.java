@@ -42,12 +42,12 @@ public class ConfirmationStat {
 		GetBundleResponse bdl;
 		try {
 			bdl = api.getBundle(txn.getBundle());
-		} catch (ArgumentException | InvalidBundleException | InvalidSignatureException e) {
+		} catch (ArgumentException | InvalidBundleException e) {
 			
 			// bad bundle?
 			return Status.INVALID;
-		} catch (NumberFormatException e) {
-			return Status.PENDING;
+		} catch (InvalidSignatureException e) {
+			return Status.BADSIGNATURE;
 		}
 		
 		// check for doublespending
