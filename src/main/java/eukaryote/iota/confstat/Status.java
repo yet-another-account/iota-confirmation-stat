@@ -14,21 +14,18 @@ public enum Status {
 	/**
 	 * Double spent failed transaction and will never be confirmed
 	 */
-	DOUBLESPEND("Failed - Double Spent"),
+	DOUBLESPENT("Double Spent (Reattach Confirmed)"),
 	
 	/**
-	 * Depth too low in network and needs to be reattached
+	 * Double spent failed transaction and will never be confirmed
 	 */
-	DEPTHLOW("Failed - Reattach Needed"),
+	BADSIG("Failed - Bad Signature"),
 	
 	
 	/**
 	 * Transaction has invalid trytes
 	 */
-	INVALID("Failed - Invalid"),
-	
-
-	BADSIGNATURE("Failed - Invalid Signature");
+	INVALID("Failed - Invalid Trytes");
 	
 	String name;
 	

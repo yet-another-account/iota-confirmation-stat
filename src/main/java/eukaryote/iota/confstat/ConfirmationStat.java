@@ -1,7 +1,11 @@
 package eukaryote.iota.confstat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import jota.IotaAPI;
 import jota.dto.response.GetBalancesResponse;
@@ -28,70 +32,44 @@ public class ConfirmationStat {
 	}
 
 	public Status statusOf(Transaction txn) throws NoNodeInfoException {
-		// transaction persistence field
-		if (txn.getPersistence() != null && txn.getPersistence().booleanValue() == true)
-			return Status.CONFIRMED;
-		
 		// check inclusion on latest milestone
 		
 		GetInclusionStateResponse incl = api.getLatestInclusion(new String[] { txn.getHash() });
 		
 		if (incl.getStates()[0])
 			return Status.CONFIRMED;
-				
-		GetBundleResponse bdl;
+
+		GetBundleResponse bundle;
 		try {
-			bdl = api.getBundle(txn.getBundle());
+			bundle = api.getBundle(txn.getBundle());
 		} catch (ArgumentException | InvalidBundleException e) {
-			
-			// bad bundle?
 			return Status.INVALID;
 		} catch (InvalidSignatureException e) {
-			return Status.BADSIGNATURE;
+			return Status.BADSIG;
 		}
 		
-		// check for doublespending
+		List<Transaction> txs = bundle.getTransactions();
+
+		List<String> expectedaddrs = new LinkedList<>();
+		long expectedtotal = 0;
 		
-		List<Transaction> inputs = new ArrayList<>(bdl.getTransactions().size());
-		
-		for (Transaction t : bdl.getTransactions()) {
-			// we only want inputs
+		for (Transaction t : txs) {
 			if (t.getValue() >= 0)
 				continue;
 			
-			inputs.add(t);
+			expectedaddrs.add(t.getHash());
+			expectedtotal += -t.getValue();
 		}
 		
-		// look up address balances and compare
-		
-		Transaction[] inparray = inputs.toArray(txnarr);
-		String[] addresses = new String[inparray.length];
-		String[] txnhashes = new String[inparray.length];
-		boolean[] inclusion = api.getLatestInclusion(txnhashes).getStates();
-		
-		for (int i = 0; i < inparray.length; i++) {
-			addresses[i] = inparray[i].getAddress();
-			txnhashes[i] = inparray[i].getHash();
+		GetBalancesResponse balances = api.getBalances(1, expectedaddrs);
+		for (String bal : balances.getBalances()) {
+			long val = Long.parseLong(bal);
+			expectedtotal -= val;
 		}
 		
-		GetBalancesResponse balances = api.getBalances(1, addresses);
-		String[] balstrs = balances.getBalances();
+		if (expectedtotal > 0)
+			return Status.DOUBLESPENT;
 		
-		
-		for (int i = 0; i < balstrs.length; i++) {
-			String balance = balstrs[i];
-			long bal = Long.parseLong(balance);
-			
-			// if not confirmed, we ignore
-			if (inclusion[i] == false)
-				continue;
-			
-			// invert value because input balance is negative
-			if (bal < -inparray[i].getValue()) {
-				return Status.DOUBLESPEND;
-			}
-		}
-		
-		return Status.PENDING;
+		return Status.PENDING;	
 	}
 }
