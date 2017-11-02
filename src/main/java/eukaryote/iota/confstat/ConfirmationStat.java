@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import jota.IotaAPI;
+import jota.dto.response.FindTransactionResponse;
 import jota.dto.response.GetBalancesResponse;
 import jota.dto.response.GetBundleResponse;
 import jota.dto.response.GetInclusionStateResponse;
@@ -39,16 +40,9 @@ public class ConfirmationStat {
 		if (incl.getStates()[0])
 			return Status.CONFIRMED;
 
-		GetBundleResponse bundle;
-		try {
-			bundle = api.getBundle(txn.getHash());
-		} catch (ArgumentException | InvalidBundleException e) {
-			return Status.INVALID;
-		} catch (InvalidSignatureException e) {
-			return Status.BADSIG;
-		}
+		FindTransactionResponse bundle = api.findTransactionsByBundles(txn.getBundle());
 		
-		List<Transaction> txs = bundle.getTransactions();
+		List<Transaction> txs = api.getTransactionsObjects(bundle.getHashes());
 
 		List<String> expectedaddrs = new LinkedList<>();
 		long expectedtotal = 0;
