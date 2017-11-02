@@ -41,7 +41,7 @@ public class ConfirmationStat {
 
 		GetBundleResponse bundle;
 		try {
-			bundle = api.getBundle(txn.getBundle());
+			bundle = api.getBundle(txn.getHash());
 		} catch (ArgumentException | InvalidBundleException e) {
 			return Status.INVALID;
 		} catch (InvalidSignatureException e) {
