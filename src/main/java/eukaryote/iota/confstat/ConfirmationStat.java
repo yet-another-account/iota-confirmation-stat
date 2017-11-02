@@ -51,7 +51,7 @@ public class ConfirmationStat {
 			if (t.getValue() >= 0)
 				continue;
 			
-			expectedaddrs.add(t.getHash());
+			expectedaddrs.add(t.getAddress());
 			expectedtotal += -t.getValue();
 		}
 		
