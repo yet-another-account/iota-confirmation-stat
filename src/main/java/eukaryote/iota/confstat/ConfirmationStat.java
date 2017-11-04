@@ -35,6 +35,9 @@ public class ConfirmationStat {
 	public Status statusOf(Transaction txn) throws NoNodeInfoException {
 		// check inclusion on latest milestone
 		
+		if (txn.getPersistence() != null && txn.getPersistence())
+			return Status.CONFIRMED;
+		
 		GetInclusionStateResponse incl = api.getLatestInclusion(new String[] { txn.getHash() });
 		
 		if (incl.getStates()[0])
