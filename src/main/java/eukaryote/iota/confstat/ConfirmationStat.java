@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.util.concurrent.RateLimiter;
+
 import jota.IotaAPI;
 import jota.dto.response.FindTransactionResponse;
 import jota.dto.response.GetBalancesResponse;
@@ -20,6 +22,7 @@ import jota.model.Transaction;
 
 public class ConfirmationStat {
 	IotaAPI api;
+	final RateLimiter rateLimiter = RateLimiter.create(2);
 	
 	// empty transaction array
 	private static final Transaction[] txnarr = {};
@@ -34,6 +37,8 @@ public class ConfirmationStat {
 
 	public Status statusOf(Transaction txn) throws NoNodeInfoException {
 		// check inclusion on latest milestone
+		
+		rateLimiter.acquire();
 		
 		if (txn.getPersistence() != null && txn.getPersistence())
 			return Status.CONFIRMED;
